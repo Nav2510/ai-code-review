@@ -1,1 +1,1 @@
-# ai-code-review
+# ai-reviewer

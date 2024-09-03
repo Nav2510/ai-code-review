@@ -1,5 +1,5 @@
 import { OpenAI } from "openai";
-import { loadSchemaFile } from "./utils/schema-loader.js";
+import { loadSchemaFile } from "../utils/schema-loader.js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const AI_MODEL = process.env.AI_MODEL || 'gpt-4o-mini';
@@ -30,7 +30,7 @@ export function createFileReview(fileContent) {
 }
 
 export const createLineSpecificReviewAndSummary = async(fileContent) => {
-  const schema = await loadSchemaFile('review-response.schema.json');
+  const schema = await loadSchemaFile('response.schema.json');
   const completions = client.chat.completions.create({
     model: AI_MODEL,
     max_tokens: MAX_TOKENS,
@@ -70,3 +70,23 @@ export const createLineSpecificReviewAndSummary = async(fileContent) => {
   });
   return completions;
 }
+
+
+const res  = await createLineSpecificReviewAndSummary(`
+  function foo(arr) {
+  const len = arr.length;
+  for (let i = 0; i < len; i++) {
+    for (let j = 0; j < len - 1 - i; j++) {
+      if (arr[j] > arr[j + 1]) {
+        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+      }
+    }
+  }
+  return ar;
+}
+const arr1 = [64, 34, 25, 12, 22, 11, 90];
+console.log(foo(arr1));
+
+  `)
+
+  console.log(res)
