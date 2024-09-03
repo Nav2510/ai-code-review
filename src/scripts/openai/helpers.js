@@ -1,15 +1,18 @@
 import { OpenAI } from "openai";
+import { loadSchemaFile } from "./utils/schema-loader.js";
 
-const openaiApiKey = process.env.OPENAI_API_KEY;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const AI_MODEL = process.env.AI_MODEL || 'gpt-4o-mini';
+const MAX_TOKENS = process.env.MAX_TOKENS || 2000;
 
-let client = new OpenAI({
-    openaiApiKey,
-  });
+const client = new OpenAI({
+  apiKey: OPENAI_API_KEY,
+});
 
 export function createFileReview(fileContent) {
   const completions = client.chat.completions.create({
-    model: 'gpt-4o-mini',
-    max_tokens: 2500,
+    model: AI_MODEL,
+    max_tokens: MAX_TOKENS,
     messages: [
       {
         role: "system",
@@ -24,13 +27,13 @@ export function createFileReview(fileContent) {
     ],
   });
   return completions;
-};
+}
 
-export function createLineSpecificReview(fileContent) {
+export const createLineSpecificReviewAndSummary = async(fileContent) => {
+  const schema = await loadSchemaFile('review-response.schema.json');
   const completions = client.chat.completions.create({
-    model: "gpt-4o-mini",
-    max_tokens: 2000,
-    response_format: { type: "json_object" },
+    model: AI_MODEL,
+    max_tokens: MAX_TOKENS,
     messages: [
       {
         role: "system",
@@ -39,23 +42,31 @@ export function createLineSpecificReview(fileContent) {
       {
         role: "user",
         content: `
-        You will provide the issues, improvements and best practices to the complete code provided to you as per below rules: 
+        You will review complete code step by step and will
+        provide all possible issues, improvements, document for methods if missing and best practices as per below rules: 
         1. Provide the result object should be 
         {
-            line: <line_number>,
-            actual: <actual code line>,
+            original_line: <original code line number>,
+            original_code: <original code line>,
             suggested_change: <suggested code changes or code changes improvements>,
             explantions: <Brief explanation of the does the suggested code change does>
+            document?: <document for method if it is missing otherwise give null>
         }
         2. Give all suggestions as per the format provided ONLY.
-        4. DO NOT GIVE full suggested code.
-        5. Give the answer in flat JSON array. And DO NOT FORMAT.
-        6. Ensure that the response is strictly in JSON format with no additional text.
+        3. Consider everything for actual code line number.
         Review the below code: 
         ${fileContent}
         `,
       },
     ],
+    response_format: {
+      type: "json_schema",
+      json_schema: {
+        name: "review_response",
+        schema: schema,
+        strict: true,
+      },
+    },
   });
   return completions;
 }
