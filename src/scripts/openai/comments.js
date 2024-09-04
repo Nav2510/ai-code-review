@@ -4,7 +4,7 @@ import path from "path";
 import { context } from "@actions/github";
 import { minimatch } from "minimatch";
 
-import { createLineSpecificReview, createFileReview } from "./openai-helper.js";
+import { createLineSpecificReviewAndSummary, createFileReview } from "./openai.js";
 
 const LINE_COMMENTS_ENABLED = true;
 
@@ -58,17 +58,12 @@ octokit.pulls
   }
 
 function createLineComments(file, fileContent, commit_id) {
-  createLineSpecificReview(fileContent).then((reviewRes) => {
+  createLineSpecificReviewAndSummary(fileContent).then((reviewRes) => {
     try {
-      const completionText = reviewRes.choices[0].message.content.trim();
+      const completionText = reviewRes.choices[0].message.content;
       console.log("completionText", completionText);
       const jsonResponse =JSON.parse(completionText);
-      let reviewList = [];
-      const keys = Object.keys(jsonResponse);
-      console.log('keys', keys);
-      keys.forEach((key) => {
-        reviewList = [...reviewList, ...jsonResponse[key]];
-      });
+      const reviewList = jsonResponse['changes'];
       console.log('reviewList', reviewList);
       reviewList.forEach((review) => {
         octokit.pulls.createReviewComment({
@@ -76,9 +71,10 @@ function createLineComments(file, fileContent, commit_id) {
           repo: repo,
           pull_number: pull_number,
           path: file.filename,
-          line: review.line,
+          line: review.original_line,
           commit_id: commit_id,
           body: `
+          ${review.type}\n
           ${review.suggested_change}\n
           Explantion: ${review.explantions}
           `

@@ -9,6 +9,25 @@ const client = new OpenAI({
   apiKey: OPENAI_API_KEY,
 });
 
+export function createSummary(fileContent) {
+  const completions = client.chat.completions.create({
+    model: AI_MODEL,
+    max_tokens: MAX_TOKENS,
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are a file summarizer. You will be provided a brief summary of code into human readable form.",
+      },
+      {
+        role: "user",
+        content: `Review the given code: ${fileContent}`,
+      },
+    ],
+  });
+  return completions;
+}
+
 export function createFileReview(fileContent) {
   const completions = client.chat.completions.create({
     model: AI_MODEL,
@@ -71,22 +90,5 @@ export const createLineSpecificReviewAndSummary = async(fileContent) => {
   return completions;
 }
 
-
-const res  = await createLineSpecificReviewAndSummary(`
-  function foo(arr) {
-  const len = arr.length;
-  for (let i = 0; i < len; i++) {
-    for (let j = 0; j < len - 1 - i; j++) {
-      if (arr[j] > arr[j + 1]) {
-        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
-      }
-    }
-  }
-  return ar;
-}
-const arr1 = [64, 34, 25, 12, 22, 11, 90];
-console.log(foo(arr1));
-
-  `)
-
-  console.log(res)
+const schema = await loadSchemaFile('response.schema.json');
+console.log(schema)

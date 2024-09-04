@@ -1,11 +1,11 @@
 {
   "name": "ai-reviewer",
-  "version": "0.0.1",
+  "version": "0.0.7",
   "description": "",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "postinstall": "node scripts/copy-workflow.js"
+    "prepare": "node src/index.js"
   },
   "repository": {
     "type": "git",
@@ -18,6 +18,9 @@
   },
   "homepage": "https://github.com/Nav2510/ai-reviewer#readme",
   "dependencies": {
+    "@actions/github": "^6.0.0",
+    "@octokit/rest": "^21.0.2",
+    "minimatch": "^10.0.1",
     "openai": "^4.57.0"
   }
 }

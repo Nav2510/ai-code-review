@@ -1,6 +1,6 @@
 import { Octokit } from "@octokit/rest";
 import { context } from "@actions/github";
-import { createSummary } from "./openai-helper.js";
+import { createSummary } from "./openai.js";
 
 // Function to update PR description
 export async function updatePRDescription(file, filePath, content) {
