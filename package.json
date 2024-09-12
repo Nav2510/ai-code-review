@@ -1,11 +1,12 @@
 {
   "name": "ai-reviewer",
-  "version": "0.0.7",
+  "version": "0.0.14",
   "description": "",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "prepare": "node src/index.js"
+    "postinstall": "node src/index.js",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -22,5 +23,10 @@
     "@octokit/rest": "^21.0.2",
     "minimatch": "^10.0.1",
     "openai": "^4.57.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "husky": "^9.1.6"
   }
 }

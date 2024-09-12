@@ -2,65 +2,27 @@ import { OpenAI } from "openai";
 import { loadSchemaFile } from "../utils/schema-loader.js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const AI_MODEL = process.env.AI_MODEL || 'gpt-4o-mini';
+const AI_MODEL = process.env.AI_MODEL || "gpt-4o-mini";
 const MAX_TOKENS = process.env.MAX_TOKENS || 2000;
 
 const client = new OpenAI({
   apiKey: OPENAI_API_KEY,
 });
 
-export function createSummary(fileContent) {
-  const completions = client.chat.completions.create({
-    model: AI_MODEL,
-    max_tokens: MAX_TOKENS,
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are a file summarizer. You will be provided a brief summary of code into human readable form.",
-      },
-      {
-        role: "user",
-        content: `Review the given code: ${fileContent}`,
-      },
-    ],
-  });
-  return completions;
-}
-
-export function createFileReview(fileContent) {
-  const completions = client.chat.completions.create({
-    model: AI_MODEL,
-    max_tokens: MAX_TOKENS,
-    messages: [
-      {
-        role: "system",
-        content: `You are a code reviewer assistant. You will provide the issues, improvements and best practices to the code provided to you.
-        You will also provide the links for any best practices that can be followed.
-        `,
-      },
-      {
-        role: "user",
-        content: `Review the given code: ${fileContent}`,
-      },
-    ],
-  });
-  return completions;
-}
-
-export const createLineSpecificReviewAndSummary = async(fileContent) => {
-  const schema = await loadSchemaFile('response.schema.json');
-  const completions = client.chat.completions.create({
-    model: AI_MODEL,
-    max_tokens: MAX_TOKENS,
-    messages: [
-      {
-        role: "system",
-        content: `You are a code reviewer assistant.`,
-      },
-      {
-        role: "user",
-        content: `
+export const createLineSpecificReviewAndSummary = async (fileContent) => {
+  try {
+    const schema = await loadSchemaFile("response.schema.json");
+    const completions = await client.chat.completions.create({
+      model: AI_MODEL,
+      max_tokens: MAX_TOKENS,
+      messages: [
+        {
+          role: "system",
+          content: `You are a code reviewer assistant.`,
+        },
+        {
+          role: "user",
+          content: `
         You will review complete code step by step and will
         provide all possible issues, improvements, document for methods if missing and best practices as per below rules: 
         1. Provide the result object should be 
@@ -76,19 +38,29 @@ export const createLineSpecificReviewAndSummary = async(fileContent) => {
         Review the below code: 
         ${fileContent}
         `,
+        },
+      ],
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "review_response",
+          schema: schema,
+          strict: true,
+        },
       },
-    ],
-    response_format: {
-      type: "json_schema",
-      json_schema: {
-        name: "review_response",
-        schema: schema,
-        strict: true,
-      },
-    },
-  });
-  return completions;
-}
+    });
+    console.log(completions);
+    const completionText = completions.choices[0].message.content;
+    console.log("completionText", completionText);
+    const jsonResponse = JSON.parse(completionText);
+    return jsonResponse;
+  } catch (error) {
+    console.error(error)
+  }
+};
 
-const schema = await loadSchemaFile('response.schema.json');
-console.log(schema)
+createLineSpecificReviewAndSummary(`
+  function foo(a, b) {
+  return a+b;
+  }
+  `);

@@ -1,9 +1,8 @@
 import { Octokit } from "@octokit/rest";
 import { context } from "@actions/github";
-import { createSummary } from "./openai.js";
 
 // Function to update PR description
-export async function updatePRDescription(file, filePath, content) {
+export async function updatePRDescription(file, filePath, summary) {
   // Get the context of the pull request
   const token = process.env.GITHUB_TOKEN;
   const { owner, repo } = context.repo;
@@ -12,9 +11,6 @@ export async function updatePRDescription(file, filePath, content) {
   const octokit = new Octokit({
     auth: token,
   });
-
-  const response  = await createSummary(content);
-  const summary = response.choices[0].message.content;
 
   // Fetch the current PR description
   const { data: pr } = await octokit.pulls.get({
