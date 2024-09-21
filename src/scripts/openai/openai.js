@@ -3,7 +3,7 @@ import { loadSchemaFile } from "../utils/schema-loader.js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const AI_MODEL = process.env.AI_MODEL || "gpt-4o-mini";
-const MAX_TOKENS = process.env.MAX_TOKENS || 2000;
+const MAX_TOKENS = process.env.MAX_TOKENS || 3000;
 
 const client = new OpenAI({
   apiKey: OPENAI_API_KEY,
@@ -49,18 +49,10 @@ export const createLineSpecificReviewAndSummary = async (fileContent) => {
         },
       },
     });
-    console.log(completions);
     const completionText = completions.choices[0].message.content;
-    console.log("completionText", completionText);
     const jsonResponse = JSON.parse(completionText);
     return jsonResponse;
   } catch (error) {
     console.error(error)
   }
 };
-
-createLineSpecificReviewAndSummary(`
-  function foo(a, b) {
-  return a+b;
-  }
-  `);

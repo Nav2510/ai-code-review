@@ -28,6 +28,6 @@ export function createLineComments(file, commit_id, reviewList) {
       });
     });
   } catch (error) {
-    throw new Error("Error while creating Comments");
+    console.log("Error while creating Comments");
   }
 }

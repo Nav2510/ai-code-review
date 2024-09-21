@@ -15,7 +15,7 @@ const octokit = new Octokit({ auth: token });
 
 // Get the context of the pull request
 const { owner, repo } = context.repo;
-const pull_number = context.payload.pull_request.number;
+const pull_number = context?.payload?.pull_request?.number;
 
 // Fetch the list of files changed in the pull request
 octokit.pulls
@@ -33,6 +33,9 @@ octokit.pulls
       }
       if (fs.existsSync(filePath)) {
         const content = fs.readFileSync(filePath, "utf8");
+        if(content.trim().length === 0 ) {
+          return;
+        }
         const { changes, summarized_code } =
           await createLineSpecificReviewAndSummary(content);
         createLineComments(file, commit_id, changes);
