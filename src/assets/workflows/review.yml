@@ -26,4 +26,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SRC_FOLDER_PATTERN: "**/src/**/*.js, **/src/**/*.ts, **/src/**/*.html, **/src/**/*.scss"
           AI_MODEL: "gpt-4o-mini"
-        run: node node_modules/ai-reviewer/src/scripts/openai/index.js
+        run: node node_modules/ai-reviewer/lib/scripts.js

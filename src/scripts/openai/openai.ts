@@ -1,17 +1,17 @@
 import { OpenAI } from "openai";
-import { loadSchemaFile } from "../utils/schema-loader.js";
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const AI_MODEL = process.env.AI_MODEL || "gpt-4o-mini";
-const MAX_TOKENS = process.env.MAX_TOKENS || 3000;
+import { JSON_SCHEMA } from "../../schemas/response.schema";
 
-const client = new OpenAI({
+const OPENAI_API_KEY: string = process.env.OPENAI_API_KEY || '';
+const AI_MODEL: string = process.env.AI_MODEL || "gpt-4o-mini";
+const MAX_TOKENS: number = +(process.env.MAX_TOKENS || 3000);
+
+const client: OpenAI = new OpenAI({
   apiKey: OPENAI_API_KEY,
 });
 
-export const createLineSpecificReviewAndSummary = async (fileContent) => {
+export const createLineSpecificReviewAndSummary = async (fileContent: string) => {
   try {
-    const schema = await loadSchemaFile("response.schema.json");
     const completions = await client.chat.completions.create({
       model: AI_MODEL,
       max_tokens: MAX_TOKENS,
@@ -24,7 +24,7 @@ export const createLineSpecificReviewAndSummary = async (fileContent) => {
           role: "user",
           content: `
         You will review complete code step by step and will
-        provide all possible issues, improvements, document for methods if missing and best practices as per below rules: 
+        provide all possible issues, improvements, PII, PHI, document for methods if missing and best practices as per below rules: 
         1. Provide the result object should be 
         {
             original_line: <original code line number>,
@@ -42,14 +42,10 @@ export const createLineSpecificReviewAndSummary = async (fileContent) => {
       ],
       response_format: {
         type: "json_schema",
-        json_schema: {
-          name: "review_response",
-          schema: schema,
-          strict: true,
-        },
+        json_schema: JSON_SCHEMA
       },
     });
-    const completionText = completions.choices[0].message.content;
+    const completionText = completions.choices[0].message.content || '';
     const jsonResponse = JSON.parse(completionText);
     return jsonResponse;
   } catch (error) {
