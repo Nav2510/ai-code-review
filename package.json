@@ -1,11 +1,12 @@
 {
   "name": "ai-reviewer",
-  "version": "1.0.4",
-  "description": "",
-  "main": "index.js",
-  "type": "module",
+  "version": "1.1.0",
+  "description": "This package reviews the changes in each PR, generates summaries per file, adds relevant comments, suggestions, and highlights areas that need fixing.",
+  "main": "lib/index.js",
   "scripts": {
-    "postinstall": "node src/index.js",
+    "build": "webpack --config webpack.config.js",
+    "postinstall": "node lib/index.js",
+    "prepublishOnly": "npm run build",
     "prepare": "husky"
   },
   "repository": {
@@ -20,13 +21,36 @@
   "homepage": "https://github.com/Nav2510/ai-reviewer#readme",
   "dependencies": {
     "@actions/github": "^6.0.0",
-    "@octokit/rest": "^21.0.2",
+    "axios": "^1.7.8",
     "minimatch": "^10.0.1",
     "openai": "^4.57.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
-    "husky": "^9.1.6"
-  }
+    "@types/node": "^22.10.1",
+    "clean-webpack-plugin": "^4.0.0",
+    "copy-webpack-plugin": "^12.0.2",
+    "husky": "^9.1.6",
+    "node-polyfill-webpack-plugin": "^4.0.0",
+    "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2",
+    "webpack": "^5.94.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-node-externals": "^3.0.0"
+  },
+  "keywords": [
+    "git",
+    "github",
+    "pull-request",
+    "gpt-4",
+    "gpt-4o",
+    "gpt-4o-mini",
+    "ci/cd",
+    "Natural Language Processing",
+    "text generation",
+    "OpenAI",
+    "Machine Learning"
+  ]
 }
